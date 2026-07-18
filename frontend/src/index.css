@@ -1,4 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&family=Lora:wght@400;500;600&italic@0;1&display=swap');
+
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", sans-serif;
+  --font-sora: "Sora", sans-serif;
+  --font-serif: "Lora", serif;
+}
 
 html,
 body,
@@ -10,5 +18,5 @@ body,
 
 body {
   background: #f8fafc;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-serif);
 }

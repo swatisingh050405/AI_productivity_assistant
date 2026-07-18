@@ -1,53 +1,48 @@
-import {
-  CalendarDays,
-  FileText,
-  ListTodo,
-} from "lucide-react";
+import { CalendarDays, FileText, ListTodo } from "lucide-react";
 
 export const featureCards = [
   {
     id: 1,
     title: "Daily Planner",
-    description: "AI-powered scheduling for your day.",
+    description: "Generate an optimized schedule for your day.",
     icon: CalendarDays,
-    color: "from-violet-500 to-purple-600",
-    button: "Plan Now",
+    gradient: "linear-gradient(135deg, #EDEBFC 0%, #FFFFFF 100%)",
+    iconBg: "#4F3FF0",
+    accent: "#4F3FF0",
+    button: "Open Planner",
     path: "/planner",
   },
   {
     id: 2,
     title: "Meeting Summarizer",
-    description: "Summarize meetings into key insights.",
+    description: "Summarize meetings into key points and action items.",
     icon: FileText,
-    color: "from-blue-500 to-cyan-500",
+    gradient: "linear-gradient(135deg, #E4F8EF 0%, #FFFFFF 100%)",
+    iconBg: "#059669",
+    accent: "#059669",
     button: "Summarize",
     path: "/summarizer",
   },
   {
     id: 3,
     title: "Task Prioritizer",
-    description: "Prioritize work intelligently using AI.",
+    description: "Prioritize your tasks and focus on what matters.",
     icon: ListTodo,
-    color: "from-emerald-500 to-green-600",
+    gradient: "linear-gradient(135deg, #FDF0DE 0%, #FFFFFF 100%)",
+    iconBg: "#D97706",
+    accent: "#D97706",
     button: "Prioritize",
     path: "/prioritizer",
   },
 ];
 
 export const recentActivities = [
-  {
-    id: 1,
-    title: "Daily plan generated",
-    time: "10 min ago",
-  },
-  {
-    id: 2,
-    title: "Meeting summarized",
-    time: "1 hour ago",
-  },
-  {
-    id: 3,
-    title: "Tasks prioritized",
-    time: "Yesterday",
-  },
+  { id: 1, title: "Daily plan generated", time: "10 min ago", tag: "Planner", tagColor: "#4F3FF0", tagBg: "#EDEBFC" },
+  { id: 2, title: "Meeting summarized", time: "1 hour ago", tag: "Meeting", tagColor: "#059669", tagBg: "#E4F8EF" },
+  { id: 3, title: "Tasks prioritized", time: "Yesterday", tag: "Tasks", tagColor: "#D97706", tagBg: "#FDF0DE" },
 ];
+
+export const dailyQuote = {
+  text: "It's not about having time, it's about making time.",
+  author: "ProdigyAI",
+};
