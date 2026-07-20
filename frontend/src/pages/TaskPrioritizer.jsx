@@ -31,13 +31,17 @@ export default function TaskPrioritizer() {
   const [loading, setLoading] = useState(false);
   const [output, setOutput] = useState([]);
 
-  const handleGenerate = async (text) => {
+  const handleGenerate = async (new_tasks) => {
     try {
       setLoading(true);
 
-      const data = await generatePriority(text);
+      const data = await generatePriority(new_tasks);
 
       setOutput(data.tasks || []);
+
+      // Refresh dashboard
+      window.dispatchEvent(new Event("tasksUpdated"));
+
     } catch (err) {
       console.error(err);
     } finally {
@@ -62,20 +66,16 @@ export default function TaskPrioritizer() {
         </p>
       </motion.div>
 
-      <div className="grid lg:grid-cols-2 gap-6 items-stretch">
-        <motion.div variants={itemVariants}>
-          <TaskInput
-            onGenerate={handleGenerate}
-            loading={loading}
-          />
-        </motion.div>
+      <motion.div variants={itemVariants}>
+        <TaskInput
+          onGenerate={handleGenerate}
+          loading={loading}
+        />
+      </motion.div>
 
-        <motion.div variants={itemVariants}>
-          <PriorityOutput
-            tasks={output}
-          />
-        </motion.div>
-      </div>
+      <motion.div variants={itemVariants}>
+        <PriorityOutput tasks={output} />
+      </motion.div>
     </motion.div>
   );
 }

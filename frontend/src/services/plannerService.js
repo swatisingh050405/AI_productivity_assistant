@@ -15,3 +15,21 @@ export async function generatePlan(text) {
 
   return await response.json();
 }
+
+export async function savePlanner(schedule) {
+  const response = await fetch(`${API_URL}/tasks/planner`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      schedule,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to save planner");
+  }
+
+  return await response.json();
+}

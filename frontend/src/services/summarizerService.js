@@ -1,46 +1,20 @@
 import API_URL from "./api";
 
-export async function streamSummary(
-  transcript,
-  onChunk,
-  onComplete,
-  onError
-) {
-  try {
-    const response = await fetch(`${API_URL}/summarizer/stream`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        transcript,
-      }),
-    });
+export async function generateSummary(transcript) {
 
-    if (!response.ok) {
-      throw new Error("Streaming failed");
-    }
+  const response = await fetch(`${API_URL}/summarizer/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      transcript,
+    }),
+  });
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-
-    let result = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-
-      if (done) break;
-
-      const chunk = decoder.decode(value);
-
-      result += chunk;
-
-      onChunk(result);
-    }
-
-    onComplete();
-
-  } catch (err) {
-    onError(err);
+  if (!response.ok) {
+    throw new Error("Failed to generate summary");
   }
+
+  return await response.json();
 }

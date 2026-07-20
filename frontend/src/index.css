@@ -2,6 +2,8 @@
 
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: "Inter", sans-serif;
   --font-sora: "Sora", sans-serif;
@@ -19,4 +21,8 @@ body,
 body {
   background: #f8fafc;
   font-family: var(--font-serif);
+}
+
+.dark body {
+  background: #0F0E14;
 }
