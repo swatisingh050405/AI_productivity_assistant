@@ -7,6 +7,7 @@ class ScheduleItem(BaseModel):
     duration: str
     task_name: str
     description: str
+    is_task: bool
 
 
 class DailySummary(BaseModel):
