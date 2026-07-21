@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 def create_task(
     db: Session,
+    user_id: int,
     title: str,
     description: str = "",
     priority: str = "Medium",
@@ -14,11 +15,13 @@ def create_task(
     task_date: str = "",
     source: str = "Planner",
 ):
+    
     # Planner tasks
     if task_date:
         existing = (
             db.query(Task)
             .filter(
+                Task.user_id == user_id,
                 Task.title == title,
                 Task.task_date == task_date,
                 Task.status == "Pending",
@@ -30,6 +33,7 @@ def create_task(
         existing = (
             db.query(Task)
             .filter(
+                Task.user_id == user_id,
                 Task.title == title,
                 Task.deadline == deadline,
                 Task.status == "Pending",
@@ -41,6 +45,7 @@ def create_task(
         return existing
 
     task = Task(
+        user_id=user_id,
         title=title,
         description=description,
         priority=priority,
@@ -56,10 +61,13 @@ def create_task(
     return task
 
 
-def delete_planner_tasks(db: Session, task_date: str):
+def delete_planner_tasks( db: Session,
+    user_id: int | None,
+    task_date: str,):
     planner_tasks = (
         db.query(Task)
         .filter(
+            Task.user_id == user_id,
             Task.source == "Planner",
             Task.task_date == task_date,
             Task.status == "Pending",
@@ -73,52 +81,76 @@ def delete_planner_tasks(db: Session, task_date: str):
     db.commit()
 
 
-def get_all_tasks(db: Session):
-    return db.query(Task).all()
+def get_all_tasks(
+    db: Session,
+   user_id: int | None,
+):
+    return (
+        db.query(Task)
+        .filter(Task.user_id == user_id)
+        .all()
+    )
 
+# In task_crud.py — only get_pending_tasks changes:
 
 def get_pending_tasks(
+    user_id: int | None,
     db: Session,
     today: str,
     recent_date: str,
 ):
     tasks = (
         db.query(Task)
-        .filter(Task.status == "Pending")
+        .filter(
+            Task.user_id == user_id,
+            Task.status == "Pending")
         .all()
     )
 
-    result = []
-
+    overdue = []
+    recent = []
     for task in tasks:
 
-        # Today's planner tasks
-        if task.task_date == today:
-            result.append(task)
+        effective_date = task.task_date or task.deadline
+
+        if not effective_date:
             continue
 
-        # Tasks whose deadline is today or overdue
-        if task.deadline and task.deadline <= today:
-            result.append(task)
+        if effective_date > today:
+            
             continue
 
-        # Recently created tasks (last 2 days) having future deadline
-        if (
-            task.task_date
-            and recent_date <= task.task_date <= today
-        ):
-            result.append(task)
+        if effective_date < recent_date:
+           
+            overdue.append(task)
+        else:
+           
+            recent.append(task)
 
-    return result
+    return {
+        "overdue": overdue,
+        "recent": recent,
+    }
 
 
+def get_dashboard_tasks(db: Session, today: str , user_id: int | None):
 
-def get_dashboard_tasks(db: Session, today: str):
+
+    if user_id is None:
+        return {
+            "tasks": [],
+            "stats": {
+                "total_tasks": 0,
+                "completed_tasks": 0,
+                "progress": 0,
+            },
+        }
 
     # All tasks that belong to today or are overdue
     all_tasks = (
         db.query(Task)
         .filter(
+            Task.user_id == user_id,
             (Task.task_date == today) |
             ((Task.deadline != "") & (Task.deadline <= today))
         )
@@ -179,10 +211,10 @@ def get_dashboard_tasks(db: Session, today: str):
     }
 
 
-def mark_task_completed(db: Session, task_id: int):
+def mark_task_completed(db: Session, task_id: int , user_id: int | None):
     task = (
         db.query(Task)
-        .filter(Task.id == task_id)
+        .filter(Task.id == task_id, Task.user_id == user_id)
         .first()
     )
 
@@ -197,10 +229,10 @@ def mark_task_completed(db: Session, task_id: int):
     return task
 
 
-def delete_task(db: Session, task_id: int):
+def delete_task(db: Session, task_id: int , user_id: int | None):
     task = (
         db.query(Task)
-        .filter(Task.id == task_id)
+        .filter(Task.id == task_id , Task.user_id == user_id)
         .first()
     )
 
@@ -213,12 +245,13 @@ def delete_task(db: Session, task_id: int):
     return True
 
 
-def update_priorities(db: Session, prioritized_tasks: list):
+def update_priorities(db: Session, prioritized_tasks: list , user_id: int | None ):
     for item in prioritized_tasks:
 
         task = (
             db.query(Task)
             .filter(
+                Task.user_id == user_id,
                 Task.title == item.task,
                 Task.status == "Pending",
             )

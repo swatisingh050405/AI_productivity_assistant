@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import ForeignKey
 from datetime import datetime
 
 from app.database.database import Base
@@ -6,6 +7,8 @@ from app.database.database import Base
 
 class Task(Base):
     __tablename__ = "tasks"
+
+    user_id = Column(Integer,ForeignKey("users.id"),nullable=False,)
 
     id = Column(Integer, primary_key=True, index=True)
 

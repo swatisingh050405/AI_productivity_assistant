@@ -6,6 +6,12 @@ from app.models.request_models import SummaryRequest
 from app.services.llm_service import generate_summary
 from app.crud.task_crud import create_task
 
+
+from app.core.security import get_current_user_optional
+
+
+from app.models.user_model import User
+
 router = APIRouter(
     prefix="/summarizer",
     tags=["Summarizer"],
@@ -16,22 +22,32 @@ router = APIRouter(
 def summarize(
     request: SummaryRequest,
     db: Session = Depends(get_db),
+   current_user: User | None = Depends(get_current_user_optional),
 ):
 
     result = generate_summary(request.transcript)
 
-    for item in result.highlights:
+    if current_user:
 
-        if not item.track:
-            continue
+        for item in result.highlights:
+               
 
-        create_task(
-            db=db,
-            title=item.text,
-            description="Generated from Meeting Summary",
-            priority="Medium",
-            deadline=item.deadline,
-            source="Meeting",
-        )
+                if not item.track:
+                    continue
+
+                
+
+                create_task(
+                    db=db,
+                    user_id=current_user.id,
+                    title=item.text,
+                    description="Generated from Meeting Summary",
+                    priority="Medium",
+                    deadline=item.deadline,
+                    source="Meeting",
+                )
+                
+
+              
 
     return result.model_dump()

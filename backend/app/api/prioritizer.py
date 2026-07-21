@@ -11,6 +11,9 @@ from app.crud.task_crud import (
     create_task,
     update_priorities,
 )
+from app.core.security import get_current_user_optional
+
+from app.models.user_model import User
 
 router = APIRouter(
     prefix="/prioritizer",
@@ -22,17 +25,23 @@ router = APIRouter(
 async def prioritize(
     request: PrioritizerRequest,
     db: Session = Depends(get_db),
+    
+current_user: User | None = Depends(get_current_user_optional),
 ):
 
     # Get relevant pending tasks
     today = date.today()
     two_days_ago = today - timedelta(days=2)
 
-    existing = get_pending_tasks(
-        db=db,
-        today=today.isoformat(),
-        recent_date=two_days_ago.isoformat(),
-    )
+    if current_user:
+        existing = get_pending_tasks(
+            db=db,
+            user_id=current_user.id,
+            today=today.isoformat(),
+            recent_date=two_days_ago.isoformat(),
+        )
+    else:
+        existing = []
 
     existing_tasks = [
         {
@@ -56,14 +65,16 @@ async def prioritize(
 
         new_tasks.append(task_data)
 
-        create_task(
-            db=db,
-            title=task.title,
-            description=task.description,
-            deadline=task.deadline,
-            task_date=task.task_date,
-            source="Prioritizer",
-        )
+        if current_user:
+            create_task(
+                db=db,
+                user_id=current_user.id,
+                title=task.title,
+                description=task.description,
+                deadline=task.deadline,
+                task_date=task.task_date,
+                source="Prioritizer",
+            )
 
     # Include newly added tasks while prioritizing
     all_tasks = existing_tasks + new_tasks
@@ -75,9 +86,11 @@ async def prioritize(
     )
 
     # Update priorities in database
-    update_priorities(
-        db=db,
-        prioritized_tasks=result.tasks,
-    )
+    if current_user:
+        update_priorities(
+            db=db,
+            user_id=current_user.id,
+            prioritized_tasks=result.tasks,
+        )
 
     return result.model_dump()

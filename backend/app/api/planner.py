@@ -11,7 +11,5 @@ router = APIRouter(
 
 @router.post("/", response_model=dict)
 async def planner(request: PlannerRequest):
-
     result = generate_planner(request.text)
-
     return result.model_dump()
