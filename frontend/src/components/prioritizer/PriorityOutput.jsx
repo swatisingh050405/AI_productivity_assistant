@@ -5,26 +5,26 @@ const PRIORITY_CONFIG = {
   High: {
     icon: Flame,
     dot: "bg-[#EF4444]",
-    headerText: "text-[#DC2626]",
-    cardBg: "bg-white",
-    cardBorder: "border-[#FFD9D9]",
-    columnBg: "bg-[#FFF8F8]",
+    headerText: "text-[#DC2626] dark:text-red-400",
+    cardBg: "bg-white dark:bg-white/5",
+    cardBorder: "border-[#FFD9D9] dark:border-red-400/20",
+    columnBg: "bg-[#FFF8F8] dark:bg-red-400/[0.06]",
   },
   Medium: {
     icon: AlertTriangle,
     dot: "bg-[#F59E0B]",
-    headerText: "text-[#D97706]",
-    cardBg: "bg-white",
-    cardBorder: "border-[#FFE8B3]",
-    columnBg: "bg-[#FFFCF4]",
+    headerText: "text-[#D97706] dark:text-amber-400",
+    cardBg: "bg-white dark:bg-white/5",
+    cardBorder: "border-[#FFE8B3] dark:border-amber-400/20",
+    columnBg: "bg-[#FFFCF4] dark:bg-amber-400/[0.06]",
   },
   Low: {
     icon: Leaf,
     dot: "bg-[#22C55E]",
-    headerText: "text-[#16A34A]",
-    cardBg: "bg-white",
-    cardBorder: "border-[#D7F5E4]",
-    columnBg: "bg-[#F6FFFA]",
+    headerText: "text-[#16A34A] dark:text-emerald-400",
+    cardBg: "bg-white dark:bg-white/5",
+    cardBorder: "border-[#D7F5E4] dark:border-emerald-400/20",
+    columnBg: "bg-[#F6FFFA] dark:bg-emerald-400/[0.06]",
   },
 };
 
@@ -37,13 +37,13 @@ function TaskCard({ item }) {
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`rounded-2xl border p-4 ${config.cardBg} ${config.cardBorder} hover:shadow-[0_6px_16px_rgba(21,19,28,0.06)] transition-shadow duration-200`}
+      className={`rounded-2xl border p-4 ${config.cardBg} ${config.cardBorder} hover:shadow-[0_6px_16px_rgba(21,19,28,0.06)] dark:hover:shadow-none dark:hover:bg-white/10 transition-all duration-200`}
     >
-      <h3 className="text-[13.5px] font-semibold text-[#15131C] leading-snug font-sans">
+      <h3 className="text-[13.5px] font-semibold text-[#15131C] dark:text-white leading-snug font-sans">
         {item.task}
       </h3>
       {item.reason && (
-        <p className="text-[12px] text-[#8E8C96] leading-relaxed mt-1.5 font-sans line-clamp-2">
+        <p className="text-[12px] text-[#8E8C96] dark:text-[#A6A3AF] leading-relaxed mt-1.5 font-sans line-clamp-2">
           {item.reason}
         </p>
       )}
@@ -60,20 +60,20 @@ export default function PriorityOutput({ tasks = [] }) {
   const topTask = tasks.find((t) => t.priority === "High") || tasks[0];
 
   return (
-    <div className="bg-white rounded-3xl border border-[#EEECF8] shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6">
+    <div className="bg-white dark:bg-[#1C1B24] rounded-3xl border border-[#EEECF8] dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-6">
       <div className="flex items-center gap-3 mb-6">
         <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#4F3FF0] to-[#4F9EF5] flex items-center justify-center shrink-0">
           <Sparkles className="text-white" size={18} />
         </div>
         <div>
-          <h2 className="text-[18px] font-semibold text-[#15131C] font-sora">Priority List</h2>
-          <p className="text-[13px] text-[#8E8C96] font-sans">AI ranked your tasks by importance.</p>
+          <h2 className="text-[18px] font-semibold text-[#15131C] dark:text-white font-sora">Priority List</h2>
+          <p className="text-[13px] text-[#8E8C96] dark:text-[#6F6C79] font-sans">AI ranked your tasks by importance.</p>
         </div>
       </div>
 
       {tasks.length === 0 ? (
-        <div className="flex min-h-[280px] items-center justify-center rounded-2xl border border-dashed border-[#E5E7EB]">
-          <p className="text-[#A1A1AA] text-sm font-sans">
+        <div className="flex min-h-[280px] items-center justify-center rounded-2xl border border-dashed border-[#E5E7EB] dark:border-white/10">
+          <p className="text-[#A1A1AA] dark:text-[#6F6C79] text-sm font-sans">
             Your prioritized tasks will appear here.
           </p>
         </div>
@@ -93,7 +93,7 @@ export default function PriorityOutput({ tasks = [] }) {
                     <p className={`text-[12px] font-bold uppercase tracking-wide ${config.headerText} font-sans`}>
                       {level} Priority
                     </p>
-                    <span className="ml-auto text-[11px] font-semibold text-[#8E8C96] bg-white rounded-full h-5 w-5 flex items-center justify-center border border-black/5">
+                    <span className="ml-auto text-[11px] font-semibold text-[#8E8C96] dark:text-[#A6A3AF] bg-white dark:bg-white/10 rounded-full h-5 w-5 flex items-center justify-center border border-black/5 dark:border-white/10">
                       {items.length}
                     </span>
                   </div>
@@ -102,7 +102,7 @@ export default function PriorityOutput({ tasks = [] }) {
                     {items.length > 0 ? (
                       items.map((item, i) => <TaskCard key={i} item={item} />)
                     ) : (
-                      <p className="text-[12px] text-[#B0AEB8] italic font-sans px-1">
+                      <p className="text-[12px] text-[#B0AEB8] dark:text-[#6F6C79] italic font-sans px-1">
                         No {level.toLowerCase()} priority tasks.
                       </p>
                     )}
@@ -113,16 +113,16 @@ export default function PriorityOutput({ tasks = [] }) {
           </div>
 
           {topTask && (
-            <div className="mt-6 pt-5 border-t border-[#F3F1FA] flex items-start gap-3.5">
+            <div className="mt-6 pt-5 border-t border-[#F3F1FA] dark:border-white/10 flex items-start gap-3.5">
               <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#4F3FF0] to-[#4F9EF5] flex items-center justify-center shrink-0">
                 <Sparkles size={16} className="text-white" />
               </div>
               <div>
-                <p className="text-[12.5px] font-bold uppercase tracking-wide text-[#4F3FF0] font-sans mb-1">
+                <p className="text-[12.5px] font-bold uppercase tracking-wide text-[#4F3FF0] dark:text-[#8C7CF7] font-sans mb-1">
                   AI Recommendation
                 </p>
-                <p className="text-[13.5px] text-[#3A3742] leading-relaxed font-sans">
-                  Focus on completing <span className="font-semibold text-[#15131C]">"{topTask.task}"</span> first.
+                <p className="text-[13.5px] text-[#3A3742] dark:text-[#D4D2DB] leading-relaxed font-sans">
+                  Focus on completing <span className="font-semibold text-[#15131C] dark:text-white">"{topTask.task}"</span> first.
                   {topTask.reason ? ` ${topTask.reason}` : " This is time-sensitive and important."}
                 </p>
               </div>

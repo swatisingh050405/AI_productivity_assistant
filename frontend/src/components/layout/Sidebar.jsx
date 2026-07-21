@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, CalendarDays, Mic, CircleCheck, Clock,
-  Sun, Moon, Sparkles, LogOut,
+  Sun, Moon, Sparkles, LogOut, LogIn, UserPlus,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -14,7 +14,7 @@ const menuItems = [
   { title: "Task Prioritizer", icon: CircleCheck, path: "/prioritizer" },
 ];
 
-const activityItem = { title: "Pending Activity", icon: Clock, path: "/history" };
+const activityItem = { title: "Pending Activity", icon: Clock, path: "/pending" };
 
 function NavItem({ title, icon: Icon, path, end, collapsed }) {
   return (
@@ -44,7 +44,7 @@ function NavItem({ title, icon: Icon, path, end, collapsed }) {
 }
 
 export default function Sidebar({ collapsed }) {
-  const { user, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
@@ -96,7 +96,7 @@ export default function Sidebar({ collapsed }) {
 
       {/* Footer Controls */}
       <div className="space-y-2 pt-6 border-t border-[#F7F6FB] dark:border-white/10">
-        {!collapsed && user && (
+        {isAuthenticated && !collapsed && user && (
           <div className="flex items-center gap-3 px-3 py-2 mb-1">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#4F8EF5] to-[#4F3FF0] flex items-center justify-center text-white text-[11.5px] font-semibold shrink-0 font-sora">
               {user.initials}
@@ -127,13 +127,32 @@ export default function Sidebar({ collapsed }) {
           )}
         </button>
 
-        <button
-          onClick={handleLogout}
-          className={`flex items-center gap-3 text-[#B0AEB8] hover:text-red-500 transition-colors duration-200 px-3 py-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 w-full ${collapsed ? "justify-center" : ""}`}
-        >
-          <LogOut size={17} />
-          {!collapsed && <span className="text-[13.5px] font-medium">Logout</span>}
-        </button>
+        {isAuthenticated ? (
+          <button
+            onClick={handleLogout}
+            className={`flex items-center gap-3 text-[#B0AEB8] hover:text-red-500 transition-colors duration-200 px-3 py-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 w-full ${collapsed ? "justify-center" : ""}`}
+          >
+            <LogOut size={17} />
+            {!collapsed && <span className="text-[13.5px] font-medium">Logout</span>}
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={() => navigate("/login")}
+              className={`flex items-center gap-3 text-[#6F6C79] dark:text-[#A6A3AF] hover:text-[#15131C] dark:hover:text-white transition-colors duration-200 px-3 py-2.5 rounded-xl hover:bg-[#F7F6FB] dark:hover:bg-white/5 w-full ${collapsed ? "justify-center" : ""}`}
+            >
+              <LogIn size={17} />
+              {!collapsed && <span className="text-[13.5px] font-medium">Log In</span>}
+            </button>
+            <button
+              onClick={() => navigate("/signup")}
+              className={`flex items-center gap-3 text-white bg-gradient-to-r from-[#4F3FF0] to-[#4F9EF5] transition-all duration-200 px-3 py-2.5 rounded-xl hover:brightness-110 w-full shadow-lg shadow-[#4F3FF0]/20 ${collapsed ? "justify-center" : ""}`}
+            >
+              <UserPlus size={17} />
+              {!collapsed && <span className="text-[13.5px] font-medium">Sign Up</span>}
+            </button>
+          </>
+        )}
       </div>
     </motion.aside>
   );

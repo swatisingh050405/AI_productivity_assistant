@@ -17,7 +17,7 @@ export default function PlannerForm({
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-[#EEECF8] shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6">
+    <div className="bg-white dark:bg-[#1C1B24] rounded-3xl border border-[#EEECF8] dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none p-6">
 
       {/* Header */}
 
@@ -27,7 +27,7 @@ export default function PlannerForm({
             <CalendarDays size={16} className="text-white" />
           </span>
 
-          <h2 className="text-[17px] font-semibold text-[#15131C] font-sora">
+          <h2 className="text-[17px] font-semibold text-[#15131C] dark:text-white font-sora">
             Daily Planner
           </h2>
         </div>
@@ -36,7 +36,7 @@ export default function PlannerForm({
           <button
             type="button"
             onClick={() => setInput("")}
-            className="flex items-center gap-1 text-[12px] font-medium text-[#8E8C96] hover:text-[#15131C]"
+            className="flex items-center gap-1 text-[12px] font-medium text-[#8E8C96] dark:text-[#6F6C79] hover:text-[#15131C] dark:hover:text-white"
           >
             <X size={13} />
             Clear
@@ -55,12 +55,12 @@ College from 9 AM to 4 PM
 Gym for 1 hour
 Complete DBMS assignment
 Practice DSA`}
-          className="w-full rounded-2xl border border-[#EEECF8] p-4 text-[14px] outline-none resize-none focus:ring-4 focus:ring-[#4F3FF0]/10 focus:border-[#4F3FF0] min-h-[170px]"
+          className="w-full rounded-2xl border border-[#EEECF8] dark:border-white/10 bg-transparent dark:bg-white/[0.03] p-4 text-[14px] text-[#15131C] dark:text-white placeholder:text-[#B0AEB8] dark:placeholder:text-[#6F6C79] outline-none resize-none focus:ring-4 focus:ring-[#4F3FF0]/10 focus:border-[#4F3FF0] min-h-[170px]"
         />
 
         <div className="flex justify-between items-center">
 
-          <span className="text-[12px] text-[#8E8C96]">
+          <span className="text-[12px] text-[#8E8C96] dark:text-[#6F6C79]">
             {hasPlan
               ? "Add more instructions and regenerate if needed."
               : "Describe your day."}
@@ -72,7 +72,7 @@ Practice DSA`}
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#EEECF8] text-[#4F3FF0] font-semibold hover:bg-[#F8F8FF]"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#EEECF8] dark:border-white/10 text-[#4F3FF0] dark:text-[#8C7CF7] font-semibold hover:bg-[#F8F8FF] dark:hover:bg-white/5"
               >
                 <RotateCcw size={15} />
                 Regenerate

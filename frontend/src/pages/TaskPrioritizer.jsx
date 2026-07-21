@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
 
 import { generatePriority } from "../services/taskService";
 import TaskInput from "../components/prioritizer/TaskInput";
@@ -27,21 +28,75 @@ const itemVariants = {
   },
 };
 
+const DRAFT_KEY = "prodigyai_prioritizer_draft";
+const DRAFT_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+function loadDraft(isAuthenticated) {
+  if (!isAuthenticated) return [];
+
+  const raw = sessionStorage.getItem(DRAFT_KEY);
+  if (!raw) return [];
+
+  try {
+    const { output, savedAt } = JSON.parse(raw);
+
+    if (Date.now() - savedAt > DRAFT_TTL_MS) {
+      sessionStorage.removeItem(DRAFT_KEY);
+      return [];
+    }
+
+    return output;
+  } catch {
+    sessionStorage.removeItem(DRAFT_KEY);
+    return [];
+  }
+}
+
 export default function TaskPrioritizer() {
+  const { isAuthenticated } = useAuth();
+
   const [loading, setLoading] = useState(false);
-  const [output, setOutput] = useState([]);
+  const [output, setOutput] = useState(() =>
+    loadDraft(isAuthenticated)
+  );
+
+  // Restore draft after login/session restoration
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const draft = loadDraft(true);
+
+    if (draft.length > 0) {
+      setOutput(draft);
+    }
+  }, [isAuthenticated]);
+
+  // Keep draft updated
+  useEffect(() => {
+    if (!isAuthenticated || output.length === 0) return;
+
+    sessionStorage.setItem(
+      DRAFT_KEY,
+      JSON.stringify({
+        output,
+        savedAt: Date.now(),
+      })
+    );
+  }, [output, isAuthenticated]);
 
   const handleGenerate = async (new_tasks) => {
     try {
       setLoading(true);
 
+      sessionStorage.removeItem(DRAFT_KEY);
+
       const data = await generatePriority(new_tasks);
 
       setOutput(data.tasks || []);
 
-      // Refresh dashboard
-      window.dispatchEvent(new Event("tasksUpdated"));
-
+      if (isAuthenticated) {
+        window.dispatchEvent(new Event("tasksUpdated"));
+      }
     } catch (err) {
       console.error(err);
     } finally {

@@ -7,6 +7,7 @@ import ProgressRing from "../components/common/ProgressRing";
 import TipCard from "../components/common/TipCard";
 import QuoteCard from "../components/common/QuoteCard";
 import RobotMascot from "../components/common/RobotMascot";
+import { useAuth } from "../context/AuthContext";
 
 import { featureCards, dailyQuote } from "../data/mockData";
 import {
@@ -38,6 +39,9 @@ const itemVariants = {
 };
 
 export default function Dashboard() {
+  const { user } = useAuth();
+  const firstName = user?.name ? user.name.split(" ")[0] : "Guest";
+
   const [tasks, setTasks] = useState([]);
 
   const [stats, setStats] = useState({
@@ -112,7 +116,7 @@ export default function Dashboard() {
       <section className="flex items-center justify-between">
         <motion.div variants={itemVariants}>
           <h1 className="text-[28px] font-bold text-[#15131C] dark:text-white tracking-tight font-sora">
-            Good Morning, Alex <span>👋</span>
+            Good Morning, {firstName} <span>👋</span>
           </h1>
 
           <p className="text-[#6F6C79] dark:text-[#A6A3AF] mt-1.5 text-[15px] font-sans">

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
 
 import TranscriptInput from "../components/summarizer/TranscriptInput";
 import SummaryOutput from "../components/summarizer/SummaryOutput";
@@ -14,28 +15,86 @@ const containerVariants = {
 
 const itemVariants = {
   hidden: { opacity: 0, y: 15 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: "easeOut" },
+  },
 };
+
+const DRAFT_KEY = "prodigyai_summarizer_draft";
+const DRAFT_TTL_MS = 10 * 60 * 1000;
+
+function loadDraft(isAuthenticated) {
+  if (!isAuthenticated) return null;
+
+  const raw = sessionStorage.getItem(DRAFT_KEY);
+  if (!raw) return null;
+
+  try {
+    const { result, savedAt } = JSON.parse(raw);
+
+    if (Date.now() - savedAt > DRAFT_TTL_MS) {
+      sessionStorage.removeItem(DRAFT_KEY);
+      return null;
+    }
+
+    return result;
+  } catch {
+    sessionStorage.removeItem(DRAFT_KEY);
+    return null;
+  }
+}
 
 export default function MeetingSummarizer() {
+  const { isAuthenticated } = useAuth();
+
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
 
- const handleGenerate = async (text) => {
-  try {
-    setLoading(true);
+  const [result, setResult] = useState(() =>
+    loadDraft(isAuthenticated)
+  );
 
-    const data = await generateSummary(text);
+  // Save latest summary
+  useEffect(() => {
+    if (!isAuthenticated || !result) return;
 
-    setResult(data);
+    sessionStorage.setItem(
+      DRAFT_KEY,
+      JSON.stringify({
+        result,
+        savedAt: Date.now(),
+      })
+    );
+  }, [result, isAuthenticated]);
 
-    window.dispatchEvent(new Event("tasksUpdated"));
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setLoading(false);
-  }
-};
+  const handleGenerate = async (text) => {
+    try {
+      setLoading(true);
+
+      sessionStorage.removeItem(DRAFT_KEY);
+
+      const data = await generateSummary(text);
+
+      setResult(data);
+
+      sessionStorage.setItem(
+        DRAFT_KEY,
+        JSON.stringify({
+          result: data,
+          savedAt: Date.now(),
+        })
+      );
+
+      if (isAuthenticated) {
+        window.dispatchEvent(new Event("tasksUpdated"));
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <motion.div
@@ -48,24 +107,32 @@ export default function MeetingSummarizer() {
         <h1 className="text-[28px] font-bold text-[#15131C] tracking-tight font-sora">
           Meeting Summarizer
         </h1>
+
         <p className="text-[#6F6C79] mt-1.5 text-[15px]">
           Paste a transcript and get an AI-powered summary in seconds.
         </p>
       </motion.div>
 
-      {/* items-stretch forces both columns to equal height */}
       <div className="grid lg:grid-cols-2 gap-6 items-stretch">
         <motion.div variants={itemVariants} className="h-full">
-          <TranscriptInput onGenerate={handleGenerate} loading={loading} />
+          <TranscriptInput
+            onGenerate={handleGenerate}
+            loading={loading}
+          />
         </motion.div>
 
         <motion.div variants={itemVariants} className="h-full">
-          <SummaryOutput summary={result?.summary || null} loading={loading} />
+          <SummaryOutput
+            summary={result?.summary || null}
+            loading={loading}
+          />
         </motion.div>
       </div>
 
       <motion.div variants={itemVariants}>
-        <MeetingHighlights highlights={result?.highlights || []} />
+        <MeetingHighlights
+          highlights={result?.highlights || []}
+        />
       </motion.div>
     </motion.div>
   );

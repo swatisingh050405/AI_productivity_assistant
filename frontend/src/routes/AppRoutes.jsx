@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import { AuthProvider } from "../context/AuthContext";
-import ProtectedRoute from "./ProtectedRoute";
+import { AuthProvider, useAuth } from "../context/AuthContext";
 import { ThemeProvider } from "../context/ThemeContext";
 
+import ForgotPassword from "../components/auth/ForgotPassword";
 import AppLayout from "../components/layout/AppLayout";
 
 import Login from "../pages/Login";
@@ -12,30 +12,44 @@ import Dashboard from "../pages/Dashboard";
 import DailyPlanner from "../pages/DailyPlanner";
 import MeetingSummarizer from "../pages/MeetingSummarizer";
 import TaskPrioritizer from "../pages/TaskPrioritizer";
+import PendingActivity from "../pages/PendingActivity";
+
+function AppContent() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center text-lg">
+        Loading...
+      </div>
+    );
+  }
+
+  return (
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+
+      {/* App Layout */}
+      <Route element={<AppLayout />}>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/planner" element={<DailyPlanner />} />
+        <Route path="/summarizer" element={<MeetingSummarizer />} />
+        <Route path="/prioritizer" element={<TaskPrioritizer />} />
+        <Route path="/pending" element={<PendingActivity />} />
+      </Route>
+    </Routes>
+  );
+}
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <AuthProvider>
-         <ThemeProvider>
-        <Routes>
-          {/* Public routes — full screen, no sidebar/navbar */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-
-          {/* Everything below shares the same AppLayout (sidebar + navbar) */}
-          <Route element={<AppLayout />}>
-            {/* Dashboard is public — renders even if not logged in */}
-            <Route path="/" element={<Dashboard />} />
-
-            {/* These require login — redirect to /login if not authenticated */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/planner" element={<DailyPlanner />} />
-              <Route path="/summarizer" element={<MeetingSummarizer />} />
-              <Route path="/prioritizer" element={<TaskPrioritizer />} />
-            </Route>
-          </Route>
-        </Routes>
+        <ThemeProvider>
+          <AppContent />
         </ThemeProvider>
       </AuthProvider>
     </BrowserRouter>
