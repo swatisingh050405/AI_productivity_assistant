@@ -15,6 +15,7 @@ from app.core.security import get_current_user_optional
 
 from app.models.user_model import User
 
+
 router = APIRouter(
     prefix="/prioritizer",
     tags=["Prioritizer"],
@@ -34,27 +35,31 @@ current_user: User | None = Depends(get_current_user_optional),
     two_days_ago = today - timedelta(days=2)
 
     if current_user:
-        existing = get_pending_tasks(
+        pending = get_pending_tasks(
             db=db,
             user_id=current_user.id,
             today=today.isoformat(),
             recent_date=two_days_ago.isoformat(),
         )
+
+        existing = pending["overdue"] + pending["recent"]
+
     else:
         existing = []
 
     existing_tasks = [
-        {
-            "task": task.title,
-            "description": task.description,
-            "deadline": task.deadline,
-        }
-        for task in existing
-    ]
+            {
+                "task": task.title,
+                "description": task.description,
+                "deadline": task.deadline,
+            }
+            for task in existing
+        ]
 
     # Save new tasks
     new_tasks = []
 
+    
     for task in request.new_tasks:
 
         task_data = {
