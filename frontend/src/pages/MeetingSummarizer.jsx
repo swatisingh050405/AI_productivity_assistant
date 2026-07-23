@@ -104,11 +104,11 @@ export default function MeetingSummarizer() {
       animate="show"
     >
       <motion.div variants={itemVariants}>
-        <h1 className="text-[28px] font-bold text-[#15131C] tracking-tight font-sora">
+        <h1 className="text-[28px] font-bold text-[#15131C] dark:text-white tracking-tight font-sora">
           Meeting Summarizer
         </h1>
 
-        <p className="text-[#6F6C79] mt-1.5 text-[15px]">
+        <p className="text-[#6F6C79] dark:text-[#A6A3AF] mt-1.5 text-[15px]">
           Paste a transcript and get an AI-powered summary in seconds.
         </p>
       </motion.div>

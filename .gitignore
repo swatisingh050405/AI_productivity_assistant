@@ -247,3 +247,6 @@ dist-ssr
 eslint.config.js
 vite.config.js
 package-lock.json
+
+
+/backend/prodigyai.db
