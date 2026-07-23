@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
+from datetime import datetime ,timedelta
 
 from app.models.task_models import Task
-from datetime import datetime, timedelta
-
 
 
 def create_task(
@@ -15,8 +15,7 @@ def create_task(
     task_date: str = "",
     source: str = "Planner",
 ):
-    
-    # Planner tasks
+
     if task_date:
         existing = (
             db.query(Task)
@@ -28,7 +27,6 @@ def create_task(
             )
             .first()
         )
-    # Summary / Prioritizer tasks
     else:
         existing = (
             db.query(Task)
@@ -61,9 +59,11 @@ def create_task(
     return task
 
 
-def delete_planner_tasks( db: Session,
+def delete_planner_tasks(
+    db: Session,
     user_id: int | None,
-    task_date: str,):
+    task_date: str,
+):
     planner_tasks = (
         db.query(Task)
         .filter(
@@ -84,57 +84,66 @@ def delete_planner_tasks( db: Session,
 def get_all_tasks(
     db: Session,
    user_id: int | None,
+
 ):
     return (
         db.query(Task)
         .filter(Task.user_id == user_id)
         .all()
+
     )
 
-# In task_crud.py — only get_pending_tasks changes:
 
-def get_pending_tasks(
-    user_id: int | None,
+def get_prioritizer_tasks(
     db: Session,
+    user_id: int,
     today: str,
-    recent_date: str,
 ):
-    tasks = (
+    return (
         db.query(Task)
         .filter(
             Task.user_id == user_id,
-            Task.status == "Pending")
+            Task.status == "Pending",
+            (
+                (func.date(Task.created_at) == today)
+                |
+                (Task.deadline == today)
+            )
+        )
         .all()
     )
 
-    overdue = []
-    recent = []
-    for task in tasks:
+def get_pending_tasks(
+    db: Session,
+    user_id: int | None,
+    today: str,
+):
+    week_ago = (
+        date.fromisoformat(today) - timedelta(days=7)
+    ).isoformat()
 
-        effective_date = task.task_date or task.deadline
-
-        if not effective_date:
-            continue
-
-        if effective_date > today:
-            
-            continue
-
-        if effective_date < recent_date:
-           
-            overdue.append(task)
-        else:
-           
-            recent.append(task)
+    pending_tasks = (
+        db.query(Task)
+        .filter(
+            Task.user_id == user_id,
+            Task.status == "Pending",
+            func.date(Task.created_at) >= week_ago,
+            func.date(Task.created_at) < today,
+        )
+        .order_by(Task.created_at.desc())
+        .all()
+    )
 
     return {
-        "overdue": overdue,
-        "recent": recent,
+        "pending": pending_tasks,
     }
 
 
-def get_dashboard_tasks(db: Session, today: str , user_id: int | None):
-
+def get_dashboard_tasks(
+    db: Session,
+    today: str,
+    user_id: int | None,
+):
 
     if user_id is None:
         return {
@@ -146,19 +155,18 @@ def get_dashboard_tasks(db: Session, today: str , user_id: int | None):
             },
         }
 
-    # All tasks that belong to today or are overdue
     all_tasks = (
         db.query(Task)
         .filter(
             Task.user_id == user_id,
-            (Task.task_date == today) |
-            ((Task.deadline != "") & (Task.deadline <= today))
+            func.date(Task.created_at) == today,
         )
         .all()
     )
 
     pending_tasks = [
-        task for task in all_tasks
+        task
+        for task in all_tasks
         if task.status == "Pending"
     ]
 
@@ -168,11 +176,8 @@ def get_dashboard_tasks(db: Session, today: str , user_id: int | None):
         "Low": 2,
     }
 
-    # Overdue High → High → Medium → Low
     pending_tasks.sort(
         key=lambda task: (
-            task.priority != "High",
-            not (task.deadline and task.deadline < today),
             priority_order.get(task.priority, 3),
             task.deadline or "9999-12-31",
         )
@@ -211,10 +216,17 @@ def get_dashboard_tasks(db: Session, today: str , user_id: int | None):
     }
 
 
-def mark_task_completed(db: Session, task_id: int , user_id: int | None):
+def mark_task_completed(
+    db: Session,
+    task_id: int,
+    user_id: int | None,
+):
     task = (
         db.query(Task)
-        .filter(Task.id == task_id, Task.user_id == user_id)
+        .filter(
+            Task.id == task_id,
+            Task.user_id == user_id,
+        )
         .first()
     )
 
@@ -222,6 +234,7 @@ def mark_task_completed(db: Session, task_id: int , user_id: int | None):
         return None
 
     task.status = "Completed"
+    task.completed_at = datetime.utcnow()
 
     db.commit()
     db.refresh(task)
@@ -229,10 +242,17 @@ def mark_task_completed(db: Session, task_id: int , user_id: int | None):
     return task
 
 
-def delete_task(db: Session, task_id: int , user_id: int | None):
+def delete_task(
+    db: Session,
+    task_id: int,
+    user_id: int | None,
+):
     task = (
         db.query(Task)
-        .filter(Task.id == task_id , Task.user_id == user_id)
+        .filter(
+            Task.id == task_id,
+            Task.user_id == user_id,
+        )
         .first()
     )
 
@@ -245,7 +265,11 @@ def delete_task(db: Session, task_id: int , user_id: int | None):
     return True
 
 
-def update_priorities(db: Session, prioritized_tasks: list , user_id: int | None ):
+def update_priorities(
+    db: Session,
+    prioritized_tasks: list,
+    user_id: int | None,
+):
     for item in prioritized_tasks:
 
         task = (

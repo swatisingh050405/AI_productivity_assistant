@@ -1,11 +1,22 @@
-import { PanelLeft, Search, LogOut } from "lucide-react";
+import { LogOut, Sparkles } from "lucide-react";
+import { PanelLeft } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 
+const FLOATERS = [
+  { top: "20%", left: "8%", size: 4, delay: 0 },
+  { top: "60%", left: "18%", size: 3, delay: 0.6 },
+  { top: "35%", left: "30%", size: 3.5, delay: 1.2 },
+  { top: "70%", left: "42%", size: 3, delay: 0.3 },
+  { top: "25%", left: "55%", size: 4, delay: 1.6 },
+  { top: "55%", left: "68%", size: 3, delay: 0.9 },
+  { top: "30%", left: "80%", size: 3.5, delay: 1.9 },
+  { top: "65%", left: "92%", size: 3, delay: 0.4 },
+];
+
 export default function Navbar({ onToggleSidebar }) {
-  const [focused, setFocused] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const navigate = useNavigate();
@@ -25,7 +36,16 @@ export default function Navbar({ onToggleSidebar }) {
   };
 
   return (
-    <header className="h-20 bg-white dark:bg-[#15131C] flex items-center gap-4 px-6 md:px-8 sticky top-0 z-20 border-b border-transparent dark:border-white/10">
+    <header className="relative h-20 bg-white dark:bg-[#15131C] flex items-center gap-4 px-6 md:px-8 sticky top-0 z-20">
+      {/* Animated gradient border — visually separates navbar from page body */}
+      <div className="absolute bottom-0 left-0 right-0 h-px overflow-hidden">
+        <motion.div
+          className="h-full w-[200%] bg-gradient-to-r from-transparent via-[#4F3FF0] to-transparent dark:via-[#8C7CF7]"
+          animate={{ x: ["-50%", "0%"] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+        />
+      </div>
+
       <button
         onClick={onToggleSidebar}
         className="h-10 w-10 shrink-0 flex items-center justify-center rounded-xl text-[#6F6C79] dark:text-[#A6A3AF] hover:bg-[#F7F6FB] dark:hover:bg-white/5 hover:text-[#15131C] dark:hover:text-white transition-colors duration-200"
@@ -33,23 +53,47 @@ export default function Navbar({ onToggleSidebar }) {
         <PanelLeft size={18} strokeWidth={2} />
       </button>
 
-      <div className="flex-1 relative">
-        <Search
-          size={17}
-          className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-200 ${
-            focused ? "text-[#4F3FF0]" : "text-[#B0AEB8] dark:text-[#6F6C79]"
-          }`}
+      {/* Minimal ambient element — replaces the non-functional search bar.
+          Purely decorative, no data fetching, no backend dependency. */}
+      <div className="flex-1 min-w-0 relative h-12 overflow-hidden rounded-2xl bg-gradient-to-r from-[#F7F6FB] via-[#FAFAFF] to-[#F7F6FB] dark:from-white/[0.05] dark:via-white/[0.08] dark:to-white/[0.05]">
+        {/* Floating sparkle dots drifting gently */}
+        {FLOATERS.map((f, i) => (
+          <motion.span
+            key={i}
+            className="absolute rounded-full bg-gradient-to-br from-[#4F3FF0] to-[#4F9EF5]"
+            style={{ top: f.top, left: f.left, width: f.size, height: f.size }}
+            animate={{
+              y: [0, -6, 0],
+              opacity: [0.4, 0.9, 0.4],
+            }}
+            transition={{
+              duration: 3.5,
+              repeat: Infinity,
+              delay: f.delay,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+
+        {/* Slow shimmer sweep across the pill */}
+        <motion.div
+          className="absolute inset-y-0 w-24 bg-gradient-to-r from-transparent via-white/60 dark:via-white/15 to-transparent"
+          animate={{ x: ["-10%", "110%"] }}
+          transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.5 }}
         />
-        <input
-          type="text"
-          placeholder="Search tasks, meetings, notes..."
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          className="w-full bg-[#F7F6FB] dark:bg-white/5 rounded-2xl pl-11 pr-14 py-3 text-sm text-[#15131C] dark:text-white placeholder:text-[#A6A3AF] dark:placeholder:text-[#6F6C79] outline-none transition-all duration-200 focus:bg-white dark:focus:bg-white/10 focus:ring-2 focus:ring-[#4F3FF0]/15"
-        />
-        <span className="hidden sm:flex items-center absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-medium text-[#B0AEB8] dark:text-[#6F6C79] border border-[#E7E5F0] dark:border-white/10 rounded-md px-1.5 py-0.5">
-          ⌘K
-        </span>
+
+        {/* Centered brand mark, subtle */}
+        <div className="absolute inset-0 flex items-center justify-center gap-2 pointer-events-none">
+          <motion.span
+            animate={{ rotate: [0, 12, 0, -12, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <Sparkles size={15} className="text-[#4F3FF0] dark:text-[#8C7CF7]" strokeWidth={2.2} />
+          </motion.span>
+          <span className="text-[13px] font-bold tracking-wide text-[#3A3742] dark:text-[#E4E2EB]">
+            ProdigyAI
+          </span>
+        </div>
       </div>
 
       <div className="flex items-center gap-3 shrink-0">

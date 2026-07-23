@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime , Date
 from sqlalchemy import ForeignKey
-from datetime import datetime
+from datetime import datetime 
 
 from app.database.database import Base
 
@@ -18,9 +18,9 @@ class Task(Base):
 
     priority = Column(String, default="Medium")
 
-    deadline = Column(String, default="")      # e.g. Today, Tomorrow, 25 July
+    deadline = Column(String , default="")      # Planner date (Today's date) / Summary
 
-    task_date = Column(String, default="")     # Planner date (Today's date)
+    task_date = Column(String , default="")    # Planner date (Today's date)
 
     status = Column(String, default="Pending")
 

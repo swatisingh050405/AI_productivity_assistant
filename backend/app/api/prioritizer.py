@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -7,7 +7,7 @@ from app.database.database import get_db
 from app.models.request_models import PrioritizerRequest
 from app.services.llm_service import generate_priorities
 from app.crud.task_crud import (
-    get_pending_tasks,
+    get_prioritizer_tasks,
     create_task,
     update_priorities,
 )
@@ -26,36 +26,28 @@ router = APIRouter(
 async def prioritize(
     request: PrioritizerRequest,
     db: Session = Depends(get_db),
-    
-current_user: User | None = Depends(get_current_user_optional),
+    current_user: User | None = Depends(get_current_user_optional),
 ):
 
-    # Get relevant pending tasks
     today = date.today()
-    two_days_ago = today - timedelta(days=2)
+
+    tasks = []
 
     if current_user:
-        pending = get_pending_tasks(
+        tasks = get_prioritizer_tasks(
             db=db,
             user_id=current_user.id,
             today=today.isoformat(),
-            recent_date=two_days_ago.isoformat(),
         )
 
-        existing = pending["overdue"] + pending["recent"]
-
-    else:
-        existing = []
-
     existing_tasks = [
-            {
-                "task": task.title,
-                "description": task.description,
-                "deadline": task.deadline,
-            }
-            for task in existing
-        ]
-
+        {
+            "task": task.title,
+            "description": task.description,
+            "deadline": task.deadline,
+        }
+        for task in tasks
+    ]
     # Save new tasks
     new_tasks = []
 

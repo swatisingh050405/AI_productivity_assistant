@@ -10,19 +10,18 @@ const PRIORITY_CONFIG = {
   Low: { icon: Leaf, color: "#16A34A", bg: "#DCFCE7" },
 };
 
-function daysOverdue(dateStr) {
-  if (!dateStr) return 0;
-  const today = new Date(new Date().toDateString());
-  const due = new Date(dateStr);
-  const diff = Math.floor((today - due) / 86400000);
-  return Math.max(diff, 0);
+function daysPending(createdAt) {
+  if (!createdAt) return 0;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const created = new Date(createdAt);
+  created.setHours(0, 0, 0, 0);
+
+  return Math.floor((today - created) / 86400000);
 }
 
-function overdueLabel(days) {
-  if (days === 0) return "Due today";
-  if (days === 1) return "1 day overdue";
-  return `${days} days overdue`;
-}
 
 function SkeletonCard() {
   return (
@@ -36,10 +35,8 @@ function SkeletonCard() {
 export default function PendingActivity() {
   const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState({
-    overdue: [],
-    recent: [],
-  });
-
+  pending: [],
+});
   useEffect(() => {
     loadActivities();
 
@@ -68,9 +65,8 @@ export default function PendingActivity() {
 
   const handleComplete = async (id) => {
     setActivities((prev) => ({
-      overdue: prev.overdue.filter((t) => t.id !== id),
-      recent: prev.recent.filter((t) => t.id !== id),
-    }));
+  pending: prev.pending.filter((t) => t.id !== id),
+}));
 
     try {
       await completeTask(id);
@@ -84,8 +80,7 @@ export default function PendingActivity() {
   const renderCard = (task, severe = false) => {
     const priority = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.Low;
     const PriorityIcon = priority.icon;
-    const days = daysOverdue(task.task_date || task.deadline);
-
+    const days = daysPending(task.created_at);
     return (
       <motion.div
         key={task.id}
@@ -124,7 +119,7 @@ export default function PendingActivity() {
                   severe ? "text-[#DC2626] dark:text-red-400" : "text-[#D97706] dark:text-amber-400"
                 }`}
               >
-                {overdueLabel(days)}
+                Pending for {days} day{days !== 1 ? "s" : ""}
               </span>
             </div>
           </div>
@@ -144,8 +139,7 @@ export default function PendingActivity() {
     );
   };
 
-  const isEmpty = activities.overdue.length === 0 && activities.recent.length === 0;
-
+  const isEmpty = activities.pending.length === 0;
   return (
     <div className="space-y-8">
 
@@ -167,47 +161,29 @@ export default function PendingActivity() {
         </div>
       ) : (
         <>
-          {activities.recent.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2.5 mb-4">
-                <span className="h-8 w-8 rounded-xl bg-gradient-to-br from-[#F59E0B] to-[#FBBF24] flex items-center justify-center shadow-lg shadow-amber-500/20">
-                  <Clock size={15} className="text-white" strokeWidth={2.3} />
-                </span>
-                <h2 className="font-bold text-[15px] text-[#D97706] dark:text-amber-400 font-sora">
-                  Recently Pending
-                </h2>
-                <span className="text-[11px] font-bold text-[#D97706] dark:text-amber-400 bg-[#FFF3E6] dark:bg-amber-400/15 rounded-full h-5 w-5 flex items-center justify-center">
-                  {activities.recent.length}
-                </span>
-                <span className="text-[11px] text-[#B0AEB8] dark:text-[#6F6C79] font-normal">
-                  within the last 3 days
-                </span>
-              </div>
+          {activities.pending.length > 0 && (
+  <div>
+    <div className="flex items-center gap-2.5 mb-4">
+      <span className="h-8 w-8 rounded-xl bg-gradient-to-br from-[#F59E0B] to-[#FBBF24] flex items-center justify-center shadow-lg shadow-amber-500/20">
+        <Clock size={15} className="text-white" strokeWidth={2.3} />
+      </span>
 
-              {activities.recent.map((task) => renderCard(task, false))}
-            </div>
-          )}
+      <h2 className="font-bold text-[15px] text-[#D97706] dark:text-amber-400 font-sora">
+        Pending Tasks
+      </h2>
 
-          {activities.overdue.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2.5 mb-4">
-                <span className="h-8 w-8 rounded-xl bg-gradient-to-br from-[#EF4444] to-[#F87171] flex items-center justify-center shadow-lg shadow-red-500/20">
-                  <AlertCircle size={15} className="text-white" strokeWidth={2.3} />
-                </span>
-                <h2 className="font-bold text-[15px] text-[#DC2626] dark:text-red-400 font-sora">
-                  Overdue
-                </h2>
-                <span className="text-[11px] font-bold text-[#DC2626] dark:text-red-400 bg-[#FFE5E5] dark:bg-red-400/15 rounded-full h-5 w-5 flex items-center justify-center">
-                  {activities.overdue.length}
-                </span>
-                <span className="text-[11px] text-[#B0AEB8] dark:text-[#6F6C79] font-normal">
-                  more than 3 days ago
-                </span>
-              </div>
+      <span className="text-[11px] font-bold text-[#D97706] dark:text-amber-400 bg-[#FFF3E6] dark:bg-amber-400/15 rounded-full h-5 w-5 flex items-center justify-center">
+        {activities.pending.length}
+      </span>
 
-              {activities.overdue.map((task) => renderCard(task, true))}
-            </div>
-          )}
+      <span className="text-[11px] text-[#B0AEB8] dark:text-[#6F6C79]">
+        Pending from previous days
+      </span>
+    </div>
+
+    {activities.pending.map((task) => renderCard(task, false))}
+  </div>
+)}
 
           {isEmpty && (
             <div className="rounded-3xl border border-dashed border-[#D9D7E3] dark:border-white/10 p-12 text-center">

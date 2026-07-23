@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from datetime import date, timedelta
+from datetime import date
 
 from app.database.database import get_db
 from app.models.request_models import PlannerSaveRequest
@@ -123,17 +123,14 @@ def pending_tasks(
 ):
     if current_user is None:
         return {
-            "overdue": [],
-            "recent": [],
+            "pending": [],
         }
 
-    today = date.today()
-    recent_date = today - timedelta(days=3)  # was 2, now 3
+    today = date.today().isoformat()
 
     return get_pending_tasks(
         db=db,
-        today=today.isoformat(),
-        recent_date=recent_date.isoformat(),
+        today=today,
         user_id=current_user.id,
     )
 

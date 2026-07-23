@@ -62,7 +62,7 @@ export default function Sidebar({ collapsed }) {
       <div>
         <div className={`flex items-center mb-10 ${collapsed ? "justify-center" : "justify-between"}`}>
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#8C7CF7] to-[#4F9EF5] text-white shadow-lg shadow-[#4F3FF0]/20">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#8C7CF7] to-[#4F9EF5] text-white shadow-lg shadow-[#4F3FF0]/20 dark:shadow-[#8C7CF7]/40">
               <Sparkles size={18} strokeWidth={2.4} />
             </div>
             {!collapsed && (
