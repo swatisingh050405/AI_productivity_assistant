@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from datetime import datetime ,timedelta
+from datetime import datetime, date, timedelta
 
 from app.models.task_models import Task
 
@@ -121,6 +121,13 @@ def get_pending_tasks(
     week_ago = (
         date.fromisoformat(today) - timedelta(days=7)
     ).isoformat()
+
+    db.query(Task).filter(
+    Task.user_id == user_id,
+    Task.status == "Pending",
+    func.date(Task.created_at) < week_ago,).delete()
+
+    db.commit()
 
     pending_tasks = (
         db.query(Task)
