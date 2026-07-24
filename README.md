@@ -17,7 +17,9 @@
 [![Status](https://img.shields.io/badge/status-active-success?style=flat-square)](#)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](#)
 
-[Features](#-features) • [Tech Stack](#-tech-stack) • [Architecture](#-architecture) • [Getting Started](#-getting-started) • [Screenshots](#-screenshots)
+[Live Demo](https://ai-productivity-assistant-iota.vercel.app/) • [Features](#-features) • [Tech Stack](#-tech-stack) • [Architecture](#-architecture) • [Getting Started](#-getting-started) • [Screenshots](#-screenshots)
+
+
 
 </div>
 
