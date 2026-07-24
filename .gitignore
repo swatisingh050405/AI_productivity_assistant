@@ -244,9 +244,7 @@ dist-ssr
 *.sw?
 
 
-eslint.config.js
-vite.config.js
-package-lock.json
+
 
 
 /backend/prodigyai.db
